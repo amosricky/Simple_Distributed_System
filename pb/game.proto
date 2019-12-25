@@ -1,0 +1,16 @@
+syntax = "proto3";
+package pb;
+
+service GetScore {
+    rpc GetScore (GetScoreRequest) returns (GetScoreReply) {}
+}
+
+message GetScoreRequest {
+    string gameName = 1;
+}
+
+message GetScoreReply {
+    int64 Home = 1;
+    int64 Visitor = 2;
+}
+
