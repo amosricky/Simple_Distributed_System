@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
-
+	"encoding/json"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"log"
 
 	"../pb"
 )
@@ -21,9 +22,15 @@ func main() {
 	c := pb.NewGetScoreClient(conn)
 
 	// 傳送新請求到遠端 gRPC 伺服器 Calculator 中，並呼叫 Plus 函式，讓兩個數字相加。
-	r, err := c.GetScore(context.Background(), &pb.GetScoreRequest{GameName:"test"})
+	result, err := c.GetScore(context.Background(), &pb.GetScoreRequest{Game:"testGame"})
 	if err != nil {
-		log.Fatalf("無法執行 Plus 函式：%v", err)
+		log.Fatalf("無法執行 GetScore 函式：%v", err)
+	}else {
+		resultJson, _ := json.Marshal(result)
+		fmt.Printf("回傳結果：%s", resultJson)
 	}
-	log.Printf("回傳結果：%s", r.String())
+
+
+	putScoreClient := pb.NewPutScoreClient(conn)
+	result, err = putScoreClient.PutScore(context.Background(), &pb.PutScoreRequest{Game:"testGame", Team:0, Round:2, Add:2})
 }

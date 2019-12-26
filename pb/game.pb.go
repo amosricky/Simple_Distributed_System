@@ -24,8 +24,33 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
+type PutScoreRequest_TeamType int32
+
+const (
+	PutScoreRequest_Home    PutScoreRequest_TeamType = 0
+	PutScoreRequest_Visitor PutScoreRequest_TeamType = 1
+)
+
+var PutScoreRequest_TeamType_name = map[int32]string{
+	0: "Home",
+	1: "Visitor",
+}
+
+var PutScoreRequest_TeamType_value = map[string]int32{
+	"Home":    0,
+	"Visitor": 1,
+}
+
+func (x PutScoreRequest_TeamType) String() string {
+	return proto.EnumName(PutScoreRequest_TeamType_name, int32(x))
+}
+
+func (PutScoreRequest_TeamType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_38fc58335341d769, []int{2, 0}
+}
+
 type GetScoreRequest struct {
-	GameName             string   `protobuf:"bytes,1,opt,name=gameName,proto3" json:"gameName,omitempty"`
+	Game                 string   `protobuf:"bytes,1,opt,name=Game,json=game,proto3" json:"Game,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -56,16 +81,18 @@ func (m *GetScoreRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetScoreRequest proto.InternalMessageInfo
 
-func (m *GetScoreRequest) GetGameName() string {
+func (m *GetScoreRequest) GetGame() string {
 	if m != nil {
-		return m.GameName
+		return m.Game
 	}
 	return ""
 }
 
 type GetScoreReply struct {
-	Home                 int64    `protobuf:"varint,1,opt,name=Home,json=home,proto3" json:"Home,omitempty"`
-	Visitor              int64    `protobuf:"varint,2,opt,name=Visitor,json=visitor,proto3" json:"Visitor,omitempty"`
+	Home                 []int32  `protobuf:"varint,1,rep,packed,name=Home,json=home,proto3" json:"Home,omitempty"`
+	HomeTotal            int32    `protobuf:"varint,2,opt,name=HomeTotal,json=homeTotal,proto3" json:"HomeTotal,omitempty"`
+	Visitor              []int32  `protobuf:"varint,3,rep,packed,name=Visitor,json=visitor,proto3" json:"Visitor,omitempty"`
+	VisitorTotal         int32    `protobuf:"varint,4,opt,name=VisitorTotal,json=visitorTotal,proto3" json:"VisitorTotal,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -96,39 +123,168 @@ func (m *GetScoreReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetScoreReply proto.InternalMessageInfo
 
-func (m *GetScoreReply) GetHome() int64 {
+func (m *GetScoreReply) GetHome() []int32 {
 	if m != nil {
 		return m.Home
 	}
-	return 0
+	return nil
 }
 
-func (m *GetScoreReply) GetVisitor() int64 {
+func (m *GetScoreReply) GetHomeTotal() int32 {
 	if m != nil {
-		return m.Visitor
+		return m.HomeTotal
 	}
 	return 0
 }
 
+func (m *GetScoreReply) GetVisitor() []int32 {
+	if m != nil {
+		return m.Visitor
+	}
+	return nil
+}
+
+func (m *GetScoreReply) GetVisitorTotal() int32 {
+	if m != nil {
+		return m.VisitorTotal
+	}
+	return 0
+}
+
+type PutScoreRequest struct {
+	Game                 string                   `protobuf:"bytes,1,opt,name=Game,json=game,proto3" json:"Game,omitempty"`
+	Team                 PutScoreRequest_TeamType `protobuf:"varint,2,opt,name=Team,json=team,proto3,enum=pb.PutScoreRequest_TeamType" json:"Team,omitempty"`
+	Round                int32                    `protobuf:"varint,3,opt,name=Round,json=round,proto3" json:"Round,omitempty"`
+	Add                  int32                    `protobuf:"varint,4,opt,name=Add,json=add,proto3" json:"Add,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
+}
+
+func (m *PutScoreRequest) Reset()         { *m = PutScoreRequest{} }
+func (m *PutScoreRequest) String() string { return proto.CompactTextString(m) }
+func (*PutScoreRequest) ProtoMessage()    {}
+func (*PutScoreRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_38fc58335341d769, []int{2}
+}
+
+func (m *PutScoreRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PutScoreRequest.Unmarshal(m, b)
+}
+func (m *PutScoreRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PutScoreRequest.Marshal(b, m, deterministic)
+}
+func (m *PutScoreRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PutScoreRequest.Merge(m, src)
+}
+func (m *PutScoreRequest) XXX_Size() int {
+	return xxx_messageInfo_PutScoreRequest.Size(m)
+}
+func (m *PutScoreRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PutScoreRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PutScoreRequest proto.InternalMessageInfo
+
+func (m *PutScoreRequest) GetGame() string {
+	if m != nil {
+		return m.Game
+	}
+	return ""
+}
+
+func (m *PutScoreRequest) GetTeam() PutScoreRequest_TeamType {
+	if m != nil {
+		return m.Team
+	}
+	return PutScoreRequest_Home
+}
+
+func (m *PutScoreRequest) GetRound() int32 {
+	if m != nil {
+		return m.Round
+	}
+	return 0
+}
+
+func (m *PutScoreRequest) GetAdd() int32 {
+	if m != nil {
+		return m.Add
+	}
+	return 0
+}
+
+type GeneralReply struct {
+	Result               string   `protobuf:"bytes,1,opt,name=Result,json=result,proto3" json:"Result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GeneralReply) Reset()         { *m = GeneralReply{} }
+func (m *GeneralReply) String() string { return proto.CompactTextString(m) }
+func (*GeneralReply) ProtoMessage()    {}
+func (*GeneralReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_38fc58335341d769, []int{3}
+}
+
+func (m *GeneralReply) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GeneralReply.Unmarshal(m, b)
+}
+func (m *GeneralReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GeneralReply.Marshal(b, m, deterministic)
+}
+func (m *GeneralReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GeneralReply.Merge(m, src)
+}
+func (m *GeneralReply) XXX_Size() int {
+	return xxx_messageInfo_GeneralReply.Size(m)
+}
+func (m *GeneralReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_GeneralReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GeneralReply proto.InternalMessageInfo
+
+func (m *GeneralReply) GetResult() string {
+	if m != nil {
+		return m.Result
+	}
+	return ""
+}
+
 func init() {
+	proto.RegisterEnum("pb.PutScoreRequest_TeamType", PutScoreRequest_TeamType_name, PutScoreRequest_TeamType_value)
 	proto.RegisterType((*GetScoreRequest)(nil), "pb.GetScoreRequest")
 	proto.RegisterType((*GetScoreReply)(nil), "pb.GetScoreReply")
+	proto.RegisterType((*PutScoreRequest)(nil), "pb.PutScoreRequest")
+	proto.RegisterType((*GeneralReply)(nil), "pb.GeneralReply")
 }
 
 func init() { proto.RegisterFile("game.proto", fileDescriptor_38fc58335341d769) }
 
 var fileDescriptor_38fc58335341d769 = []byte{
-	// 152 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x4f, 0xcc, 0x4d,
-	0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2a, 0x48, 0x52, 0xd2, 0xe5, 0xe2, 0x77, 0x4f,
-	0x2d, 0x09, 0x4e, 0xce, 0x2f, 0x4a, 0x0d, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x11, 0x92, 0xe2,
-	0xe2, 0x00, 0x29, 0xf2, 0x4b, 0xcc, 0x4d, 0x95, 0x60, 0x54, 0x60, 0xd4, 0xe0, 0x0c, 0x82, 0xf3,
-	0x95, 0x6c, 0xb9, 0x78, 0x11, 0xca, 0x0b, 0x72, 0x2a, 0x85, 0x84, 0xb8, 0x58, 0x3c, 0xf2, 0xa1,
-	0x0a, 0x99, 0x83, 0x58, 0x32, 0xf2, 0x73, 0x53, 0x85, 0x24, 0xb8, 0xd8, 0xc3, 0x32, 0x8b, 0x33,
-	0x4b, 0xf2, 0x8b, 0x24, 0x98, 0xc0, 0xc2, 0xec, 0x65, 0x10, 0xae, 0x91, 0x03, 0x17, 0x07, 0x4c,
-	0xbb, 0x90, 0x09, 0x12, 0x5b, 0x58, 0xaf, 0x20, 0x49, 0x0f, 0xcd, 0x1d, 0x52, 0x82, 0xa8, 0x82,
-	0x05, 0x39, 0x95, 0x4a, 0x0c, 0x49, 0x6c, 0x60, 0xa7, 0x1b, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff,
-	0xe7, 0x86, 0x93, 0x1c, 0xc8, 0x00, 0x00, 0x00,
+	// 313 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x52, 0xc1, 0x4e, 0xc2, 0x40,
+	0x10, 0xa5, 0xb4, 0x85, 0x32, 0xa2, 0xd4, 0xc1, 0x98, 0x86, 0x70, 0xc0, 0x4d, 0x34, 0x9c, 0x1a,
+	0x03, 0xde, 0xd5, 0x13, 0x1e, 0xcd, 0x4a, 0xbc, 0x2f, 0x76, 0x22, 0x24, 0x2d, 0x5b, 0x97, 0x2d,
+	0x09, 0x27, 0xff, 0xc5, 0x2f, 0x35, 0xbb, 0xa5, 0x52, 0x89, 0x89, 0xb7, 0x99, 0x37, 0xef, 0x75,
+	0xde, 0x9b, 0x2e, 0xc0, 0xbb, 0xc8, 0x28, 0xce, 0x95, 0xd4, 0x12, 0x9b, 0xf9, 0x82, 0x5d, 0x43,
+	0x6f, 0x46, 0xfa, 0xe5, 0x4d, 0x2a, 0xe2, 0xf4, 0x51, 0xd0, 0x46, 0x23, 0x82, 0x37, 0x13, 0x19,
+	0x45, 0xce, 0xc8, 0x19, 0x77, 0xb8, 0x67, 0x04, 0xec, 0x13, 0x4e, 0x0f, 0xb4, 0x3c, 0xdd, 0x19,
+	0xd2, 0x93, 0xb4, 0x24, 0x77, 0xec, 0x73, 0x6f, 0x29, 0x33, 0xc2, 0x21, 0x74, 0x0c, 0x36, 0x97,
+	0x5a, 0xa4, 0x51, 0x73, 0xe4, 0x8c, 0x7d, 0xde, 0x59, 0x56, 0x00, 0x46, 0xd0, 0x7e, 0x5d, 0x6d,
+	0x56, 0x5a, 0xaa, 0xc8, 0xb5, 0xa2, 0xf6, 0xb6, 0x6c, 0x91, 0x41, 0x77, 0x3f, 0x29, 0xa5, 0x9e,
+	0x95, 0x76, 0xb7, 0x35, 0x8c, 0x7d, 0x39, 0xd0, 0x7b, 0x2e, 0xfe, 0x35, 0x8a, 0xb7, 0xe0, 0xcd,
+	0x49, 0x64, 0x76, 0xfd, 0xd9, 0x64, 0x18, 0xe7, 0x8b, 0xf8, 0x48, 0x16, 0x9b, 0xf9, 0x7c, 0x97,
+	0x13, 0xf7, 0x34, 0x89, 0x0c, 0x2f, 0xc0, 0xe7, 0xb2, 0x58, 0x27, 0x91, 0x6b, 0xd7, 0xfa, 0xca,
+	0x34, 0x18, 0x82, 0xfb, 0x98, 0x24, 0x7b, 0x2b, 0xae, 0x48, 0x12, 0x76, 0x05, 0x41, 0xa5, 0xc4,
+	0xa0, 0x4c, 0x1f, 0x36, 0xf0, 0xe4, 0x27, 0x55, 0xe8, 0xb0, 0x1b, 0xe8, 0xce, 0x68, 0x4d, 0x4a,
+	0xa4, 0xe5, 0x91, 0x2e, 0xa1, 0xc5, 0x69, 0x53, 0xa4, 0x7a, 0x6f, 0xb1, 0xa5, 0x6c, 0x37, 0x79,
+	0x80, 0xa0, 0xba, 0x26, 0xde, 0xd5, 0xea, 0xbe, 0xb1, 0x7b, 0xf4, 0x3b, 0x06, 0xe7, 0xbf, 0xc1,
+	0x3c, 0xdd, 0xb1, 0xc6, 0xe4, 0x1e, 0x82, 0x2a, 0x16, 0x4e, 0x6b, 0x75, 0xff, 0x8f, 0xc0, 0x83,
+	0xb0, 0xfc, 0xc2, 0xc1, 0x18, 0x6b, 0x2c, 0x5a, 0xf6, 0x09, 0x4c, 0xbf, 0x03, 0x00, 0x00, 0xff,
+	0xff, 0xf3, 0x5f, 0x49, 0x28, 0x10, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -205,6 +361,78 @@ var _GetScore_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetScore",
 			Handler:    _GetScore_GetScore_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "game.proto",
+}
+
+// PutScoreClient is the client API for PutScore service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type PutScoreClient interface {
+	PutScore(ctx context.Context, in *PutScoreRequest, opts ...grpc.CallOption) (*GeneralReply, error)
+}
+
+type putScoreClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewPutScoreClient(cc *grpc.ClientConn) PutScoreClient {
+	return &putScoreClient{cc}
+}
+
+func (c *putScoreClient) PutScore(ctx context.Context, in *PutScoreRequest, opts ...grpc.CallOption) (*GeneralReply, error) {
+	out := new(GeneralReply)
+	err := c.cc.Invoke(ctx, "/pb.PutScore/PutScore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PutScoreServer is the server API for PutScore service.
+type PutScoreServer interface {
+	PutScore(context.Context, *PutScoreRequest) (*GeneralReply, error)
+}
+
+// UnimplementedPutScoreServer can be embedded to have forward compatible implementations.
+type UnimplementedPutScoreServer struct {
+}
+
+func (*UnimplementedPutScoreServer) PutScore(ctx context.Context, req *PutScoreRequest) (*GeneralReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PutScore not implemented")
+}
+
+func RegisterPutScoreServer(s *grpc.Server, srv PutScoreServer) {
+	s.RegisterService(&_PutScore_serviceDesc, srv)
+}
+
+func _PutScore_PutScore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutScoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PutScoreServer).PutScore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.PutScore/PutScore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PutScoreServer).PutScore(ctx, req.(*PutScoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _PutScore_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.PutScore",
+	HandlerType: (*PutScoreServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PutScore",
+			Handler:    _PutScore_PutScore_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

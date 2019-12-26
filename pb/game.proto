@@ -5,12 +5,33 @@ service GetScore {
     rpc GetScore (GetScoreRequest) returns (GetScoreReply) {}
 }
 
+service PutScore {
+    rpc PutScore (PutScoreRequest) returns (GeneralReply) {}
+}
+
 message GetScoreRequest {
-    string gameName = 1;
+    string Game = 1;
 }
 
 message GetScoreReply {
-    int64 Home = 1;
-    int64 Visitor = 2;
+    repeated int32 Home = 1;
+    int32 HomeTotal = 2;
+    repeated int32 Visitor = 3;
+    int32 VisitorTotal = 4;
+}
+
+message PutScoreRequest {
+    string Game = 1;
+    enum TeamType {
+        Home = 0;
+        Visitor = 1;
+      }
+    TeamType Team = 2;
+    int32 Round = 3;
+    int32 Add = 4;
+}
+
+message GeneralReply {
+    string Result = 1;
 }
 

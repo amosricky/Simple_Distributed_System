@@ -15,11 +15,16 @@ import (
 // master 建構體會實作 Calculator 的 gRPC 伺服器。
 type server struct{}
 
-// Plus 會將傳入的數字加總。
 func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetScoreReply, error) {
-
+	fmt.Printf("GetScore request：%s", in.Game)
 	// 包裝成 Protobuf 建構體並回傳。
-	return &pb.GetScoreReply{Home:20, Visitor:10}, nil
+	return &pb.GetScoreReply{Home:[]int32{10,20,30},HomeTotal:60, Visitor:[]int32{30,40,50}, VisitorTotal:120}, nil
+}
+
+func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.GeneralReply, error) {
+	fmt.Printf("PutScore request：%s", in)
+	// 包裝成 Protobuf 建構體並回傳。
+	return &pb.GeneralReply{Result:"ok"}, nil
 }
 
 func main() {
@@ -33,6 +38,7 @@ func main() {
 	// 建立新 gRPC 伺服器並註冊 Calculator 服務。
 	s := grpc.NewServer()
 	pb.RegisterGetScoreServer(s, &server{})
+	pb.RegisterPutScoreServer(s, &server{})
 
 	// 在 gRPC 伺服器上註冊反射服務。
 	reflection.Register(s)
