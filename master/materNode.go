@@ -1,50 +1,84 @@
 package main
 
 import (
+	"Simple_Distributed_System/pb"
+	"Simple_Distributed_System/setting"
 	"fmt"
-	"log"
-	"net"
-
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-
-	"../pb"
+	"net"
+	"time"
 )
 
-// master 建構體會實作 Calculator 的 gRPC 伺服器。
 type server struct{}
 
 func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetScoreReply, error) {
-	fmt.Printf("GetScore request：%s", in.Game)
-	// 包裝成 Protobuf 建構體並回傳。
+	logrus.Printf("GetScore request：%s\n", in.Game)
 	return &pb.GetScoreReply{Home:[]int32{10,20,30},HomeTotal:60, Visitor:[]int32{30,40,50}, VisitorTotal:120}, nil
 }
 
 func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.GeneralReply, error) {
-	fmt.Printf("PutScore request：%s", in)
-	// 包裝成 Protobuf 建構體並回傳。
+	logrus.Printf("PutScore request：%s\n", in)
 	return &pb.GeneralReply{Result:"ok"}, nil
 }
 
+func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.GetGameListReply, error) {
+	logrus.Printf("GetGameList request：%s\n", in)
+	return &pb.GetGameListReply{Game:[]string{"Game1", "Game2"}}, nil
+}
+
+func (s *server) PostNewGame(ctx context.Context, in *pb.PostNewGameRequest) (*pb.GeneralReply, error) {
+	logrus.Printf("PostNewGame request：%s\n", in)
+	return &pb.GeneralReply{Result:"ok"}, nil
+}
+
+func mongoDB(port int) (*mongo.Client, context.Context, error){
+	var db *mongo.Client
+	var mongoCtx context.Context
+	var rspErr error
+
+	for{
+		logrus.Printf("Connecting to MongoDB...")
+		mongoCtx, _ = context.WithTimeout(context.Background(), 10*time.Second)
+		db, rspErr = mongo.Connect(mongoCtx, options.Client().ApplyURI(fmt.Sprintf("mongodb://localhost:%v", port)))
+		if rspErr!=nil{
+			logrus.Printf("Could not connect to MongoDB: %v\n", rspErr)
+			break
+		}
+		logrus.Printf("Connected to Mongodb successfully")
+		break
+	}
+	return db, mongoCtx, rspErr
+}
+
 func main() {
-	// 監聽指定埠口，這樣服務才能在該埠口執行。
-	fmt.Println("Start!")
-	lis, err := net.Listen("tcp", ":50051")
+
+	// Init config
+	setting.Setup()
+
+	// Init database
+	_, mongoCtx, err := mongoDB(setting.DatabaseSetting.Port)
 	if err != nil {
-		fmt.Println("無法監聽該埠口：%v", err)
+		logrus.Fatalf("Can't listen on port：%v", err.Error())
 	}
 
-	// 建立新 gRPC 伺服器並註冊 Calculator 服務。
-	s := grpc.NewServer()
-	pb.RegisterGetScoreServer(s, &server{})
-	pb.RegisterPutScoreServer(s, &server{})
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", setting.ServerSetting.Port))
+	if err != nil {
+		logrus.Fatalf("Can't listen on port：%v", err.Error())
+	}
 
-	// 在 gRPC 伺服器上註冊反射服務。
+	// Create a new gRPC server
+	s := grpc.NewServer()
+	pb.RegisterServiceServerServer(s, &server{})
 	reflection.Register(s)
 
-	// 開始在指定埠口中服務。
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("無法提供服務：%v", err)
+		logrus.Fatalf("Can't init gRPC server：%v", err.Error())
 	}
+
+	defer mongoCtx.Done()
 }

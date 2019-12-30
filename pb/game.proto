@@ -1,14 +1,23 @@
 syntax = "proto3";
 package pb;
 
-service GetScore {
+service ServiceServer {
     rpc GetScore (GetScoreRequest) returns (GetScoreReply) {}
-}
-
-service PutScore {
     rpc PutScore (PutScoreRequest) returns (GeneralReply) {}
+    rpc GetGameList (GeneralRequest) returns (GetGameListReply) {}
+    rpc PostNewGame (PostNewGameRequest) returns (GeneralReply) {}
 }
 
+// General
+message GeneralRequest {
+
+}
+
+message GeneralReply {
+    string Result = 1;
+}
+
+// GetScore
 message GetScoreRequest {
     string Game = 1;
 }
@@ -20,6 +29,7 @@ message GetScoreReply {
     int32 VisitorTotal = 4;
 }
 
+// PutScore
 message PutScoreRequest {
     string Game = 1;
     enum TeamType {
@@ -31,7 +41,13 @@ message PutScoreRequest {
     int32 Add = 4;
 }
 
-message GeneralReply {
-    string Result = 1;
+// GetGameList
+message GetGameListReply {
+   repeated string Game = 1;
+}
+
+// PostNewGame
+message PostNewGameRequest {
+   string Game = 1;
 }
 

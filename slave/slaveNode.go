@@ -1,36 +1,59 @@
 package main
 
 import (
+	"Simple_Distributed_System/pb"
+	"Simple_Distributed_System/setting"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"log"
-
-	"../pb"
 )
 
+
 func main() {
-	// 連線到遠端 gRPC 伺服器。
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+	setting.Setup()
+	serverUrl := fmt.Sprintf("localhost:%v", setting.ServerSetting.Port)
+	conn, err := grpc.Dial(serverUrl, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("連線失敗：%v", err)
+		logrus.Fatalf("Can't connect to server：%v", err)
 	}
 	defer conn.Close()
 
-	// 建立新的 Calculator 客戶端，所以等一下就能夠使用 Calculator 的所有方法。
-	c := pb.NewGetScoreClient(conn)
-
-	// 傳送新請求到遠端 gRPC 伺服器 Calculator 中，並呼叫 Plus 函式，讓兩個數字相加。
-	result, err := c.GetScore(context.Background(), &pb.GetScoreRequest{Game:"testGame"})
+	connGetScore := pb.NewServiceServerClient(conn)
+	resultGetScore, err := connGetScore.GetScore(context.Background(), &pb.GetScoreRequest{Game:"testGame"})
 	if err != nil {
-		log.Fatalf("無法執行 GetScore 函式：%v", err)
+		logrus.Fatalf("Can't execute [GetScore] function：%v", err)
 	}else {
-		resultJson, _ := json.Marshal(result)
-		fmt.Printf("回傳結果：%s", resultJson)
+		resultJson, _ := json.Marshal(resultGetScore)
+		logrus.Printf("Reply [GetScore]：%s", resultJson)
 	}
 
+	connPutScore := pb.NewServiceServerClient(conn)
+	resultPutScore, err := connPutScore.PutScore(context.Background(), &pb.PutScoreRequest{Game:"testGame", Team:1, Round:2, Add:2})
+	if err != nil {
+		logrus.Printf("Can't execute [PutScore] function：%v", err)
+	}else {
+		resultJson, _ := json.Marshal(resultPutScore)
+		logrus.Printf("Reply [PutScore]：%s", resultJson)
+	}
 
-	putScoreClient := pb.NewPutScoreClient(conn)
-	result, err = putScoreClient.PutScore(context.Background(), &pb.PutScoreRequest{Game:"testGame", Team:0, Round:2, Add:2})
+	connGetGameList := pb.NewServiceServerClient(conn)
+	resultGetGameList, err := connGetGameList.GetGameList(context.Background(), &pb.GeneralRequest{})
+	if err != nil {
+		logrus.Printf("Can't execute [GetGameList] function：%v", err)
+	}else {
+		resultJson, _ := json.Marshal(resultGetGameList)
+		logrus.Printf("Reply [GetGameList]：%s", resultJson)
+	}
+
+	connPostNewGame := pb.NewServiceServerClient(conn)
+	resultPostNewGame, err := connPostNewGame.PostNewGame(context.Background(), &pb.PostNewGameRequest{Game:"NewGame123"})
+	if err != nil {
+		logrus.Printf("Can't execute [PostNewGame] function：%v", err)
+	}else {
+		resultJson, _ := json.Marshal(resultPostNewGame)
+		logrus.Printf("Reply [PostNewGame]：%s", resultJson)
+	}
 }
