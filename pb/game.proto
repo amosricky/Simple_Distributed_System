@@ -43,11 +43,16 @@ message PutScoreRequest {
 
 // GetGameList
 message GetGameListReply {
-   repeated string Game = 1;
+    repeated GameItem Game = 1;
+}
+
+message GameItem {
+    string id = 1;
+    string Game = 2;
 }
 
 // PostNewGame
 message PostNewGameRequest {
-   string Game = 1;
+    string Game = 1;
 }
 

@@ -11,7 +11,12 @@ type Server struct {
 }
 
 type Database struct {
+	ServerIP string
 	Port int
+	Account string
+	Password string
+	DBName string
+	CollectionName string
 }
 
 type Log struct {
