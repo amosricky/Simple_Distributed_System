@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/net/context"
@@ -21,9 +24,15 @@ type Person struct {
 	City string
 }
 
-type Person2 struct {
-	Name string
-	Age  int
+type GameItem struct {
+	Game string `bson:"game"`
+	ID    primitive.ObjectID `bson:"_id,omitempty"`
+	Score ScoreStruct `bson:"score"`
+}
+
+type ScoreStruct struct {
+	Home []int `bson:"home"`
+	Visitor []int `bson:"visitor"`
 }
 
 var db *mongo.Client
@@ -43,6 +52,8 @@ func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.Gene
 func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.GetGameListReply, error) {
 	logrus.Printf("GetGameList request：%s\n", in)
 	var result []*pb.GameItem
+	//result = append(result, &pb.GameItem{Id:"123", Game:"123"})
+	//result = append(result, &pb.GameItem{Id:"123", Game:"123"})
 
 	for{
 		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -60,32 +71,32 @@ func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.Ge
 				logrus.Fatal(err.Error())
 				break
 			}
-			result = append(result, &Game)
+			Game.Id = "FFF"
+			result = append(result, Game)
+			tt := &pb.GameItem{
+				Id: string(Game.Id),
+				Game:Game.Game,
+			}
+			fmt.Println(tt)
 		}
 		break
 	}
-	fmt.Println(result)
-	//item1 := pb.GameItem{Id:"123", Game:"123"}
-	//item2 := pb.GameItem{Id:"456", Game:"456"}
-	GameList := pb.GetGameListReply{}
-	return &GameList, nil
-	//return &pb.GetGameListReply{result}, nil
+	return &pb.GetGameListReply{Game:result}, nil
 }
 
 func (s *server) PostNewGame(ctx context.Context, in *pb.PostNewGameRequest) (*pb.GeneralReply, error) {
 	logrus.Printf("PostNewGame request：%s\n", in)
 	collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-	newGame := pb.PostNewGameRequest{Game:in.Game}
+	newGame := GameItem{Game:in.Game}
 	result, err := collection.InsertOne(context.TODO(), newGame)
 	if err != nil {
 		logrus.Fatal(err.Error())
 		return &pb.GeneralReply{Result:err.Error()}, err
 	}
-	return &pb.GeneralReply{Result:fmt.Sprintf("Create a new game: %v",result.InsertedID)}, err
+	return &pb.GeneralReply{Result:fmt.Sprintf("Create a new game: %v",result.InsertedID)}, nil
 }
 
 func mongoDB(port int) (){
-
 	var err error
 
 	for{
@@ -118,7 +129,6 @@ func mongoDB(port int) (){
 //}
 
 func main() {
-
 	// Init config
 	setting.Setup()
 

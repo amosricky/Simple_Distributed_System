@@ -21,23 +21,23 @@ func main() {
 	}
 	defer conn.Close()
 
-	connGetScore := pb.NewServiceServerClient(conn)
-	resultGetScore, err := connGetScore.GetScore(context.Background(), &pb.GetScoreRequest{Game:"testGame"})
-	if err != nil {
-		logrus.Fatalf("Can't execute [GetScore] function：%v", err)
-	}else {
-		resultJson, _ := json.Marshal(resultGetScore)
-		logrus.Printf("Reply [GetScore]：%s", resultJson)
-	}
+	//connGetScore := pb.NewServiceServerClient(conn)
+	//resultGetScore, err := connGetScore.GetScore(context.Background(), &pb.GetScoreRequest{Game:"testGame"})
+	//if err != nil {
+	//	logrus.Fatalf("Can't execute [GetScore] function：%v", err)
+	//}else {
+	//	resultJson, _ := json.Marshal(resultGetScore)
+	//	logrus.Printf("Reply [GetScore]：%s", resultJson)
+	//}
 
-	connPutScore := pb.NewServiceServerClient(conn)
-	resultPutScore, err := connPutScore.PutScore(context.Background(), &pb.PutScoreRequest{Game:"testGame", Team:1, Round:2, Add:2})
-	if err != nil {
-		logrus.Printf("Can't execute [PutScore] function：%v", err)
-	}else {
-		resultJson, _ := json.Marshal(resultPutScore)
-		logrus.Printf("Reply [PutScore]：%s", resultJson)
-	}
+	//connPutScore := pb.NewServiceServerClient(conn)
+	//resultPutScore, err := connPutScore.PutScore(context.Background(), &pb.PutScoreRequest{Game:"testGame", Team:1, Round:2, Add:2})
+	//if err != nil {
+	//	logrus.Printf("Can't execute [PutScore] function：%v", err)
+	//}else {
+	//	resultJson, _ := json.Marshal(resultPutScore)
+	//	logrus.Printf("Reply [PutScore]：%s", resultJson)
+	//}
 
 	connGetGameList := pb.NewServiceServerClient(conn)
 	resultGetGameList, err := connGetGameList.GetGameList(context.Background(), &pb.GeneralRequest{})
@@ -48,12 +48,12 @@ func main() {
 		logrus.Printf("Reply [GetGameList]：%s", resultJson)
 	}
 
-	connPostNewGame := pb.NewServiceServerClient(conn)
-	resultPostNewGame, err := connPostNewGame.PostNewGame(context.Background(), &pb.PostNewGameRequest{Game:"NewGame123"})
-	if err != nil {
-		logrus.Printf("Can't execute [PostNewGame] function：%v", err)
-	}else {
-		resultJson, _ := json.Marshal(resultPostNewGame)
-		logrus.Printf("Reply [PostNewGame]：%s", resultJson)
-	}
+	//connPostNewGame := pb.NewServiceServerClient(conn)
+	//resultPostNewGame, err := connPostNewGame.PostNewGame(context.Background(), &pb.PostNewGameRequest{Game:"NewGame123"})
+	//if err != nil {
+	//	logrus.Printf("Can't execute [PostNewGame] function：%v", err)
+	//}else {
+	//	resultJson, _ := json.Marshal(resultPostNewGame)
+	//	logrus.Printf("Reply [PostNewGame]：%s", resultJson)
+	//}
 }
