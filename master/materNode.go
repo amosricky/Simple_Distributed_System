@@ -7,8 +7,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/net/context"
@@ -18,16 +16,10 @@ import (
 	"time"
 )
 
-type Person struct {
-	Name string
-	Age  int
-	City string
-}
-
 type GameItem struct {
-	Game string `bson:"game"`
-	ID    primitive.ObjectID `bson:"_id,omitempty"`
-	Score ScoreStruct `bson:"score"`
+	ID      primitive.ObjectID `bson:"_id,omitempty"`
+	Game 	string `bson:"game"`
+	Score 	ScoreStruct `bson:"score"`
 }
 
 type ScoreStruct struct {
@@ -52,32 +44,24 @@ func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.Gene
 func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.GetGameListReply, error) {
 	logrus.Printf("GetGameList request：%s\n", in)
 	var result []*pb.GameItem
-	//result = append(result, &pb.GameItem{Id:"123", Game:"123"})
-	//result = append(result, &pb.GameItem{Id:"123", Game:"123"})
 
 	for{
 		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-		cur, err := collection.Find(queryCtx, bson.D{})
+		cur, err := collection.Find(queryCtx, bson.M{})
 		if err != nil {
 			logrus.Fatal(err.Error())
 			break
 		}
 
 		for cur.Next(context.TODO()) {
-			Game := &pb.GameItem{}
-			err := cur.Decode(Game)
+			data := &GameItem{}
+			err := cur.Decode(data)
 			if err != nil {
 				logrus.Fatal(err.Error())
 				break
 			}
-			Game.Id = "FFF"
-			result = append(result, Game)
-			tt := &pb.GameItem{
-				Id: string(Game.Id),
-				Game:Game.Game,
-			}
-			fmt.Println(tt)
+			result = append(result, &pb.GameItem{Id:data.ID.Hex(), Game:data.Game})
 		}
 		break
 	}
@@ -113,20 +97,6 @@ func mongoDB(port int) (){
 		break
 	}
 }
-
-//func test()  {
-//	collection := db.Database("mydb").Collection("persons")
-//	ruan := Person{"Ruan", 34, "Cape Town"}
-//	_, err := collection.InsertOne(context.TODO(), ruan)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	doc2 := Person2{"Ruan", 34}
-//	_, err = collection.InsertOne(context.TODO(), doc2)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//}
 
 func main() {
 	// Init config
