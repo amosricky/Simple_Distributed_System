@@ -19,7 +19,7 @@ message GeneralReply {
 
 // GetScore
 message GetScoreRequest {
-    string Game = 1;
+    string ID = 1;
 }
 
 message GetScoreReply {
@@ -31,7 +31,7 @@ message GetScoreReply {
 
 // PutScore
 message PutScoreRequest {
-    string Game = 1;
+    string ID = 1;
     enum TeamType {
         Home = 0;
         Visitor = 1;
@@ -47,7 +47,7 @@ message GetGameListReply {
 }
 
 message GameItem {
-    string id = 1;
+    string ID = 1;
     string Game = 2;
 }
 

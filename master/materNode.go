@@ -23,8 +23,8 @@ type GameItem struct {
 }
 
 type ScoreStruct struct {
-	Home []int `bson:"home"`
-	Visitor []int `bson:"visitor"`
+	Home [9]int32 `bson:"home"`
+	Visitor [9]int32 `bson:"visitor"`
 }
 
 var db *mongo.Client
@@ -32,12 +32,44 @@ var mongoCtx context.Context
 type server struct{}
 
 func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetScoreReply, error){
-	logrus.Printf("GetScore request：%s\n", in.Game)
-	return &pb.GetScoreReply{Home:[]int32{10,20,30},HomeTotal:60, Visitor:[]int32{30,40,50}, VisitorTotal:120}, nil
+	logrus.Printf("GetScore request：%s\n", in.ID)
+	var result GameItem
+
+	for{
+		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
+		objectID, err := primitive.ObjectIDFromHex(in.ID)
+		if err != nil {
+			logrus.Fatal(err.Error())
+			return &pb.GetScoreReply{}, err
+		}
+
+		err = collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&result)
+		if err != nil {
+			logrus.Fatal(err.Error())
+			return &pb.GetScoreReply{}, err
+		}
+		break
+	}
+
+	//return &pb.GetScoreReply{Home:[]int32{10,20,30},HomeTotal:60, Visitor:[]int32{30,40,50}, VisitorTotal:120}, nil
+
+	return &pb.GetScoreReply{Home:result.Score.Home[:], HomeTotal:100, Visitor:result.Score.Visitor[:], VisitorTotal:200}, nil
 }
 
 func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.GeneralReply, error) {
 	logrus.Printf("PutScore request：%s\n", in)
+
+	//for{
+	//	queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	//	collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
+	//	objectID, err := primitive.ObjectIDFromHex(in.ID)
+	//	initScore := [9]int{}
+	//	if err != nil {
+	//		logrus.Fatal(err.Error())
+	//		return &pb.GeneralReply{Result:err.Error()}, err
+	//	}
+	//}
 	return &pb.GeneralReply{Result:"ok"}, nil
 }
 
@@ -61,7 +93,7 @@ func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.Ge
 				logrus.Fatal(err.Error())
 				break
 			}
-			result = append(result, &pb.GameItem{Id:data.ID.Hex(), Game:data.Game})
+			result = append(result, &pb.GameItem{ID:data.ID.Hex(), Game:data.Game})
 		}
 		break
 	}
@@ -71,7 +103,8 @@ func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.Ge
 func (s *server) PostNewGame(ctx context.Context, in *pb.PostNewGameRequest) (*pb.GeneralReply, error) {
 	logrus.Printf("PostNewGame request：%s\n", in)
 	collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-	newGame := GameItem{Game:in.Game}
+	initScore := ScoreStruct{Home:[9]int32{}, Visitor:[9]int32{}}
+	newGame := GameItem{Game:in.Game, Score:initScore,}
 	result, err := collection.InsertOne(context.TODO(), newGame)
 	if err != nil {
 		logrus.Fatal(err.Error())
