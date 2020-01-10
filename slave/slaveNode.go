@@ -31,7 +31,7 @@ func main() {
 	}
 
 	//connPutScore := pb.NewServiceServerClient(conn)
-	//resultPutScore, err := connPutScore.PutScore(context.Background(), &pb.PutScoreRequest{ID:"5e16e0bdc0c834deff93bb6f", Team:1, Round:2, Add:2})
+	//resultPutScore, err := connPutScore.PutScore(context.Background(), &pb.PutScoreRequest{ID:"5e16fa4d464087a28bac9e8b", Team:2, Round:2, Add:2})
 	//if err != nil {
 	//	logrus.Printf("Can't execute [PutScore] function：%v", err)
 	//}else {
