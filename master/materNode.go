@@ -52,24 +52,54 @@ func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetS
 		break
 	}
 
-	//return &pb.GetScoreReply{Home:[]int32{10,20,30},HomeTotal:60, Visitor:[]int32{30,40,50}, VisitorTotal:120}, nil
-
 	return &pb.GetScoreReply{Home:result.Score.Home[:], HomeTotal:100, Visitor:result.Score.Visitor[:], VisitorTotal:200}, nil
 }
 
 func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.GeneralReply, error) {
 	logrus.Printf("PutScore request：%s\n", in)
+	var getItem GameItem
 
-	//for{
-	//	queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	//	collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-	//	objectID, err := primitive.ObjectIDFromHex(in.ID)
-	//	initScore := [9]int{}
-	//	if err != nil {
-	//		logrus.Fatal(err.Error())
-	//		return &pb.GeneralReply{Result:err.Error()}, err
-	//	}
-	//}
+	for{
+		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
+		objectID, err := primitive.ObjectIDFromHex(in.ID)
+		if err != nil {
+			logrus.Fatal(err.Error())
+			return &pb.GeneralReply{Result:err.Error()}, err
+		}
+
+		err = collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&getItem)
+		if err != nil {
+			logrus.Fatal(err.Error())
+			return &pb.GeneralReply{Result:err.Error()}, err
+		}
+
+		switch in.Team.String() {
+		case "Home":
+			score := getItem.Score.Home
+			score[in.Round-1] += in.Add
+
+			update := bson.M{
+				"$set": bson.M{"score.home":score},
+			}
+
+			// Result not use
+			collection.FindOneAndUpdate(queryCtx, bson.M{"_id": objectID}, update)
+		case "Visitor":
+			score := getItem.Score.Visitor
+			score[in.Round-1] += in.Add
+
+			update := bson.M{
+				"$set": bson.M{"score.visitor":score},
+			}
+
+			// Result not use
+			collection.FindOneAndUpdate(queryCtx, bson.M{"_id": objectID}, update)
+		default:
+			return &pb.GeneralReply{Result:"Team not exist."}, nil
+		}
+		break
+	}
 	return &pb.GeneralReply{Result:"ok"}, nil
 }
 
