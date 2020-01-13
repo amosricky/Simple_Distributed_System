@@ -52,7 +52,17 @@ func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetS
 		break
 	}
 
-	return &pb.GetScoreReply{Home:result.Score.Home[:], HomeTotal:100, Visitor:result.Score.Visitor[:], VisitorTotal:200}, nil
+	homeScore := result.Score.Home[:]
+	visitorScore := result.Score.Visitor[:]
+	countHomeScore := int32(0)
+	countVisitorScore := int32(0)
+
+	for i:=0;i<9;i++{
+		countHomeScore += homeScore[i]
+		countVisitorScore += visitorScore[i]
+	}
+
+	return &pb.GetScoreReply{Home:homeScore, HomeTotal:countHomeScore, Visitor:visitorScore, VisitorTotal:countVisitorScore}, nil
 }
 
 func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.GeneralReply, error) {
