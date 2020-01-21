@@ -10,7 +10,8 @@ service ServiceServer {
 
 // General
 message GeneralRequest {
-
+    string DbIP = 1;
+    int32 DbPort = 2;
 }
 
 message GeneralReply {
@@ -19,7 +20,9 @@ message GeneralReply {
 
 // GetScore
 message GetScoreRequest {
-    string ID = 1;
+    string DbIP = 1;
+    int32 DbPort = 2;
+    string ID = 3;
 }
 
 message GetScoreReply {
