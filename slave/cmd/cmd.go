@@ -18,6 +18,8 @@ var gameName string
 var gameTeam int32
 var gameRound int32
 var gameAdd int32
+var dbIP string
+var dbPort int32
 
 var rootCmd = &cobra.Command{Use: "",}
 
@@ -33,7 +35,7 @@ var scoreCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(gameID)!=0{
 			connGetScore := pb.NewServiceServerClient(conn)
-			resultGetScore, err := connGetScore.GetScore(context.Background(), &pb.GetScoreRequest{ID:gameID})
+			resultGetScore, err := connGetScore.GetScore(context.Background(), &pb.GetScoreRequest{ID:gameID, DbIP:dbIP, DbPort:dbPort})
 			if err != nil {
 				logrus.Warnf("Can't execute [GetScore] function：%v", err.Error())
 			}else {
@@ -52,7 +54,7 @@ var listCmd = &cobra.Command{
 	Long: `Get game list. (Contain gameName & gameID)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		connGetGameList := pb.NewServiceServerClient(conn)
-		resultGetGameList, err := connGetGameList.GetGameList(context.Background(), &pb.GeneralRequest{})
+		resultGetGameList, err := connGetGameList.GetGameList(context.Background(), &pb.GeneralRequest{DbIP:dbIP, DbPort:dbPort})
 		if err != nil {
 			logrus.Warnf("Can't execute [GetGameList] function：%v", err.Error())
 		}else {
@@ -89,6 +91,7 @@ var newGameCmd = &cobra.Command{
 	Short: "Create a new game.",
 	Long: `Create a new game.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Print(gameName)
 		if len(gameName)!=0{
 			connPostNewGame := pb.NewServiceServerClient(conn)
 			resultPostNewGame, err := connPostNewGame.PostNewGame(context.Background(), &pb.PostNewGameRequest{Game:gameName})
@@ -118,9 +121,16 @@ func Exit()  {
 }
 
 func init() {
+	// Init Config
+	setting.Setup()
+
 	// Init Cli
 	cobra.OnInitialize()
 	scoreCmd.Flags().StringVarP(&gameID, "id", "i", "", "game id")
+	scoreCmd.Flags().StringVarP(&dbIP, "dbIP", "d", setting.DatabaseSetting.ServerIP, "database ip")
+	scoreCmd.Flags().Int32VarP(&dbPort, "dbPort", "p", int32(setting.DatabaseSetting.Port), "database port")
+	listCmd.Flags().StringVarP(&dbIP, "dbIP", "d", setting.DatabaseSetting.ServerIP, "database ip")
+	listCmd.Flags().Int32VarP(&dbPort, "dbPort", "p", int32(setting.DatabaseSetting.Port), "database port")
 	addCmd.Flags().StringVarP(&gameID, "id", "i", "", "game id")
 	addCmd.Flags().Int32VarP(&gameTeam, "team", "t", -1, "team ([0]home [1]visitor)")
 	addCmd.Flags().Int32VarP(&gameRound, "round", "r", 0, "round ([min]1 [max]9)")
@@ -130,7 +140,6 @@ func init() {
 	gameCmd.AddCommand(scoreCmd, listCmd, addCmd, newGameCmd)
 
 	//// Init DB connection
-	setting.Setup()
 	serverUrl := fmt.Sprintf("localhost:%v", setting.ServerSetting.Port)
 	conn, err = grpc.Dial(serverUrl, grpc.WithInsecure())
 	if err != nil {

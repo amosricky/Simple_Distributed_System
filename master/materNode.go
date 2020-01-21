@@ -27,8 +27,6 @@ type ScoreStruct struct {
 	Visitor [9]int32 `bson:"visitor"`
 }
 
-var db *mongo.Client
-var mongoCtx context.Context
 type server struct{}
 
 func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetScoreReply, error){
@@ -36,18 +34,24 @@ func (s *server) GetScore(ctx context.Context, in *pb.GetScoreRequest) (*pb.GetS
 	var result GameItem
 
 	for{
+		db, dbErr := mongoDB(in.DbIP, int(in.DbPort))
+		if dbErr != nil{
+			logrus.Printf("Could not connect to MongoDB: %v\n", dbErr.Error())
+			return &pb.GetScoreReply{}, dbErr
+		}
 		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		defer queryCtx.Done()
 		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-		objectID, err := primitive.ObjectIDFromHex(in.ID)
-		if err != nil {
-			logrus.Fatal(err.Error())
-			return &pb.GetScoreReply{}, err
+		objectID, objectIDErr := primitive.ObjectIDFromHex(in.ID)
+		if objectIDErr != nil {
+			logrus.Warnf(objectIDErr.Error())
+			return &pb.GetScoreReply{}, objectIDErr
 		}
 
-		err = collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&result)
-		if err != nil {
-			logrus.Fatal(err.Error())
-			return &pb.GetScoreReply{}, err
+		findOneErr := collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&result)
+		if findOneErr != nil {
+			logrus.Warnf(findOneErr.Error())
+			return &pb.GetScoreReply{}, findOneErr
 		}
 		break
 	}
@@ -70,18 +74,29 @@ func (s *server) PutScore(ctx context.Context, in *pb.PutScoreRequest) (*pb.Gene
 	var getItem GameItem
 
 	for{
+		db, dbErr := mongoDB(setting.DatabaseSetting.ServerIP,setting.DatabaseSetting.Port)
+		if dbErr != nil{
+			logrus.Printf("Could not connect to MongoDB: %v\n", dbErr.Error())
+			return &pb.GeneralReply{Result:dbErr.Error()}, dbErr
+		}
 		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		defer queryCtx.Done()
 		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-		objectID, err := primitive.ObjectIDFromHex(in.ID)
-		if err != nil {
-			logrus.Fatal(err.Error())
-			return &pb.GeneralReply{Result:err.Error()}, err
+		objectID, objectIDErr := primitive.ObjectIDFromHex(in.ID)
+		if objectIDErr != nil {
+			logrus.Warnf(objectIDErr.Error())
+			return &pb.GeneralReply{Result:objectIDErr.Error()}, objectIDErr
 		}
 
-		err = collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&getItem)
-		if err != nil {
-			logrus.Fatal(err.Error())
-			return &pb.GeneralReply{Result:err.Error()}, err
+		FindOneErr := collection.FindOne(queryCtx, bson.M{"_id": objectID}).Decode(&getItem)
+		if FindOneErr != nil {
+			logrus.Warnf(FindOneErr.Error())
+			return &pb.GeneralReply{Result:FindOneErr.Error()}, FindOneErr
+		}
+
+		if (in.Round > 9) || (in.Round < 1){
+			logrus.Warnf("Round range must in 1~9")
+			return &pb.GeneralReply{Result:"Round range must in 1~9"}, nil
 		}
 
 		switch in.Team.String() {
@@ -118,20 +133,28 @@ func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.Ge
 	var result []*pb.GameItem
 
 	for{
+		fmt.Printf("DBIP : %v \n", in.DbIP)
+		fmt.Printf("DbPort : %v \n", in.DbPort)
+		db, dbErr := mongoDB(in.DbIP, int(in.DbPort))
+		if dbErr != nil{
+			logrus.Printf("Could not connect to MongoDB: %v\n", dbErr.Error())
+			return &pb.GetGameListReply{}, dbErr
+		}
 		queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		defer queryCtx.Done()
 		collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
-		cur, err := collection.Find(queryCtx, bson.M{})
-		if err != nil {
-			logrus.Fatal(err.Error())
-			break
+		cur, curErr := collection.Find(queryCtx, bson.M{})
+		if curErr != nil {
+			logrus.Warnf(curErr.Error())
+			return &pb.GetGameListReply{}, curErr
 		}
 
 		for cur.Next(context.TODO()) {
 			data := &GameItem{}
-			err := cur.Decode(data)
-			if err != nil {
-				logrus.Fatal(err.Error())
-				break
+			decodeErr := cur.Decode(data)
+			if decodeErr != nil {
+				logrus.Warnf(decodeErr.Error())
+				return &pb.GetGameListReply{}, decodeErr
 			}
 			result = append(result, &pb.GameItem{ID:data.ID.Hex(), Game:data.Game})
 		}
@@ -142,41 +165,61 @@ func (s *server) GetGameList(ctx context.Context, in *pb.GeneralRequest) (*pb.Ge
 
 func (s *server) PostNewGame(ctx context.Context, in *pb.PostNewGameRequest) (*pb.GeneralReply, error) {
 	logrus.Printf("PostNewGame request：%s\n", in)
+
+	db, dbErr := mongoDB(setting.DatabaseSetting.ServerIP,setting.DatabaseSetting.Port)
+	if dbErr != nil{
+		logrus.Printf("Could not connect to MongoDB: %v\n", dbErr.Error())
+		return &pb.GeneralReply{Result:dbErr.Error()}, dbErr
+	}
+	queryCtx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	defer queryCtx.Done()
 	collection := db.Database(setting.DatabaseSetting.DBName).Collection(setting.DatabaseSetting.CollectionName)
 	initScore := ScoreStruct{Home:[9]int32{}, Visitor:[9]int32{}}
 	newGame := GameItem{Game:in.Game, Score:initScore,}
-	result, err := collection.InsertOne(context.TODO(), newGame)
-	if err != nil {
-		logrus.Fatal(err.Error())
-		return &pb.GeneralReply{Result:err.Error()}, err
+	result, insertOneErr := collection.InsertOne(queryCtx, newGame)
+	if insertOneErr != nil {
+		logrus.Fatal(insertOneErr.Error())
+		return &pb.GeneralReply{Result:insertOneErr.Error()}, insertOneErr
 	}
 	return &pb.GeneralReply{Result:fmt.Sprintf("Create a new game: %v",result.InsertedID)}, nil
 }
 
-func mongoDB(port int) (){
+func mongoDB(ip string , port int) (*mongo.Client, error) {
+	var db *mongo.Client
+	var mongoCtx context.Context
 	var err error
 
 	for{
 		logrus.Printf("Connecting to MongoDB...")
 		mongoCtx, _ = context.WithTimeout(context.Background(), 5*time.Second)
-		dbUrl := fmt.Sprintf("mongodb://%v:%v@%v:%v", setting.DatabaseSetting.Account, setting.DatabaseSetting.Password, setting.DatabaseSetting.ServerIP, port)
+		dbUrl := fmt.Sprintf("mongodb://%v:%v/?connect=direct", ip, port)
+		fmt.Printf(dbUrl)
 		db, err = mongo.Connect(mongoCtx, options.Client().ApplyURI(dbUrl))
-		err = db.Ping(mongoCtx, nil)
-		if err!=nil{
-			logrus.Printf("Could not connect to MongoDB: %v\n", err.Error())
+		if err != nil{
 			break
 		}
-		logrus.Printf("Connected to Mongodb successfully")
+
+		for times:=0; times<3;times++{
+			err = db.Ping(mongoCtx, nil)
+			if err!=nil{
+				logrus.Printf("Could not connect to MongoDB: %v\n", err.Error())
+				time.Sleep(3 * time.Second)
+			}else {
+				logrus.Printf("Connected to Mongodb successfully")
+				err = nil
+				break
+			}
+		}
 		break
 	}
+	return db, err
 }
 
 func main() {
+	logrus.Infof("Mater node start")
+
 	// Init config
 	setting.Setup()
-
-	// Init database
-	mongoDB(setting.DatabaseSetting.Port)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", setting.ServerSetting.Port))
 	if err != nil {
@@ -191,6 +234,4 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		logrus.Fatalf("Can't init gRPC server：%v", err.Error())
 	}
-
-	defer mongoCtx.Done()
 }
