@@ -139,7 +139,7 @@ func init() {
 	rootCmd.AddCommand(gameCmd)
 	gameCmd.AddCommand(scoreCmd, listCmd, addCmd, newGameCmd)
 
-	//// Init DB connection
+	// Init DB connection
 	serverUrl := fmt.Sprintf("localhost:%v", setting.ServerSetting.Port)
 	conn, err = grpc.Dial(serverUrl, grpc.WithInsecure())
 	if err != nil {

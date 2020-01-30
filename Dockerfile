@@ -1,0 +1,11 @@
+FROM golang:latest
+ENV GOPROXY https://proxy.golang.org,direct
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+RUN echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+RUN apt-get update && apt-get install -y mongodb-org-shell
+RUN mkdir $GOPATH/src/Simple_Distributed_System
+ADD . $GOPATH/src/Simple_Distributed_System
+WORKDIR $GOPATH/src/Simple_Distributed_System/master
+RUN go build .
+
+#ENTRYPOINT ["./master"]

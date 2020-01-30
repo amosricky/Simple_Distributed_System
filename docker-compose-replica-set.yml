@@ -1,0 +1,46 @@
+version: '3'
+services:
+  master_node:
+    build: .
+    image: mater_node
+    container_name: mater_node
+    network_mode: host
+    depends_on:
+      - rs1
+      - rs2
+      - rs3
+    command: sh -x ../replica_set.sh
+  rs1:
+    image: mongo:4.2
+    container_name: rs1
+    ports:
+      - "27041:27041"
+    command: mongod --replSet RS --port 27041 --dbpath /data/db --config /resource/mongod.yml
+    volumes:
+      - ./replica/config/mongod.yml:/resource/mongod.yml
+      - ./replica/data/rs1:/data/db
+   
+  rs2:
+    image: mongo:4.2
+    container_name: rs2
+    ports:
+      - "27042:27042"
+    command: mongod --replSet RS --port 27042 --dbpath /data/db --config /resource/mongod.yml
+    volumes:
+      - ./replica/config/mongod.yml:/resource/mongod.yml
+      - ./replica/data/rs2:/data/db
+  
+  rs3:
+    image: mongo:4.2
+    container_name: rs3
+    ports:
+      - "27043:27043"
+    command: mongod --replSet RS --port 27043 --dbpath /data/db --config /resource/mongod.yml
+    volumes:
+      - ./replica/config/mongod.yml:/resource/mongod.yml
+      - ./replica/data/rs3:/data/db
+
+
+
+ 
+   
