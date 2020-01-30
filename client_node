@@ -1,0 +1,7 @@
+FROM golang:1.13.7
+ENV GOPROXY https://proxy.golang.org,direct
+RUN mkdir $GOPATH/src/Simple_Distributed_System
+ADD . $GOPATH/src/Simple_Distributed_System
+WORKDIR $GOPATH/src/Simple_Distributed_System/client
+RUN go build .
+#ENTRYPOINT ["./client"]

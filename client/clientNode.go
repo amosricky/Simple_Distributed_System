@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Simple_Distributed_System/slave/cmd"
+	"Simple_Distributed_System/client/cmd"
 	"bufio"
 	"fmt"
 	"os"

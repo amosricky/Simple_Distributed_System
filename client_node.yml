@@ -1,0 +1,10 @@
+version: '3'
+services:
+  client_node:
+    build:
+      context: .
+      dockerfile: client_node
+    image: client_node
+    container_name: client_node
+    network_mode: host
+    command: sh -x ../client_node.sh
