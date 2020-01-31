@@ -7,5 +7,3 @@ RUN mkdir $GOPATH/src/Simple_Distributed_System
 ADD . $GOPATH/src/Simple_Distributed_System
 WORKDIR $GOPATH/src/Simple_Distributed_System/server
 RUN go build .
-
-#ENTRYPOINT ["./master"]
