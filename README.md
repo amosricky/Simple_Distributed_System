@@ -21,12 +21,81 @@ $ docker-compose -f server_node.yml up
 ```
 
 ## Quick Start Client
+![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/client_node.gif)
 ```
 # Change path to project
 $ cd ./Simple_Distributed_System
 
 # Run it 
 $ docker-compose -f client_node.yml run client_node 
+```
+
+## CLI Document
+```
+$ game help
+Get & Modify game record
+
+Usage:
+   game [command]
+
+Available Commands:
+  add         Add point by game ID.
+  list        Get game list. (Contain gameName & gameID)
+  new         Create a new game.
+  score       Get score by game ID.
+
+Flags:
+  -h, --help   help for game
+```
+```
+$ game new -h
+Create a new game.
+
+Usage:
+   game new [flags]
+
+Flags:
+  -h, --help          help for new
+  -n, --name string   game name
+```
+```
+$ game list -h
+Get game list. (Contain gameName & gameID)
+
+Usage:
+   game list [flags]
+
+Flags:
+  -d, --dbIP string    database ip (default "127.0.0.1")
+  -p, --dbPort int32   database port (default 27041)
+  -h, --help           help for list
+```
+```
+$ game add -h
+Add point by game ID.
+
+Usage:
+   game add [flags]
+
+Flags:
+  -a, --add int32     add point
+  -h, --help          help for add
+  -i, --id string     game id
+  -r, --round int32   round ([min]1 [max]9)
+  -t, --team int32    team ([0]home [1]visitor) (default -1)
+```
+```
+$ game score -h
+Get score by game ID.
+
+Usage:
+   game score [flags]
+
+Flags:
+  -d, --dbIP string    database ip (default "127.0.0.1")
+  -p, --dbPort int32   database port (default 27041)
+  -h, --help           help for score
+  -i, --id string      game id
 ```
 
 ## Features
