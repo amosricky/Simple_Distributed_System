@@ -6,6 +6,7 @@ Using gRPC (Golang), replica-set (mongoDB), Cobra (CLI) this project could ...
 3. Backup database automatically.
 
 ## Quick Start Server
+![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/server_node.gif)
 ```
 $ cd $GOPATH/src
 
