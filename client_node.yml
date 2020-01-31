@@ -7,4 +7,6 @@ services:
     image: client_node
     container_name: client_node
     network_mode: host
-    command: sh -x ../client_node.sh
+    stdin_open: true
+    tty: true
+
