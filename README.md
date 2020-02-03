@@ -97,6 +97,19 @@ Flags:
   -h, --help           help for score
   -i, --id string      game id
 ```
+## Demo
+* Create a new game called "testGame", and then check game list.
+
+![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/demo_addGame.gif)
+
+* Add 5 point for home team on second round.
+* Add 3 point for guest team on second round.
+
+![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/demo_addScore.gif)
+
+* Read the data from different replica node. (Because we use replica set as database node which could backup the data automatically, we could READ the data from every replica set node.)
+
+![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/demo_getInfo.gif)
 
 ## Features
 
