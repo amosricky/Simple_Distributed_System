@@ -114,7 +114,7 @@ Flags:
 
 ![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/demo_addScore.gif)
 
-* Read the data from different replica node. 
+* Read the data from different replica node.\
  (Because we use replica set as database node which could backup the data automatically, we could READ the data from every replica set node.)
 
 ![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/demo_getInfo.gif)
@@ -156,7 +156,7 @@ Flags:
 ├── server_node          // Dockerfile - server node.
 ├── server_node.sh       // Use to run server node after mongoDB started.  
 ├── server_node.yml      // docker-compose.yml - server node.
-└── setting              //Initialize the configuration
+└── setting              // Initialize the configuration
     └── setting.go
 ...
 ```
