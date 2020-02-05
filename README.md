@@ -5,6 +5,12 @@ Using gRPC (Golang), replica-set (mongoDB), Cobra (CLI) this project could ...
 2. Create or update the the baseball game record with CLI terminal.
 3. Backup database automatically.
 
+## Article
+1. [[筆記] 實作分散式計分系統(一) : 基礎架構](https://medium.com/@amosricky95/%E7%AD%86%E8%A8%98-%E5%AF%A6%E4%BD%9C%E5%88%86%E6%95%A3%E5%BC%8F%E8%A8%88%E5%88%86%E7%B3%BB%E7%B5%B1-%E4%BA%8C-replica-set-in-container-5759b1b4cd5)
+1. [[筆記] 實作分散式計分系統(二) : Replica Set in Container](https://medium.com/@amosricky95/%E7%AD%86%E8%A8%98-%E5%AF%A6%E4%BD%9C%E5%88%86%E6%95%A3%E5%BC%8F%E8%A8%88%E5%88%86%E7%B3%BB%E7%B5%B1-%E4%BA%8C-replica-set-in-container-5759b1b4cd5)
+1. [[筆記] 實作分散式計分系統(三) : Unfinished ](https://medium.com/@amosricky95/%E7%AD%86%E8%A8%98-%E5%AF%A6%E4%BD%9C%E5%88%86%E6%95%A3%E5%BC%8F%E8%A8%88%E5%88%86%E7%B3%BB%E7%B5%B1-%E4%BA%8C-replica-set-in-container-5759b1b4cd5)
+
+
 ## System Architecture Diagram
 ![](https://raw.githubusercontent.com/amosricky/Simple_Distributed_System/master/src/system_architecture_diagram.png)
 1. Each node is a container.
